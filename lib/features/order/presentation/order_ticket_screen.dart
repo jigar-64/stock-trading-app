@@ -192,8 +192,11 @@ class _OrderTicketScreenState extends ConsumerState<OrderTicketScreen> {
       appBar: AppBar(
         title: Text('${isBuy ? 'Buy' : 'Sell'} ${widget.symbol}'),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SafeArea(
+          child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,6 +409,7 @@ class _OrderTicketScreenState extends ConsumerState<OrderTicketScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -185,6 +185,13 @@ class StockPickerDialog extends ConsumerWidget {
                               onPressed: () {
                                 onStockSelected(symbol);
                                 Navigator.of(context).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('$symbol added to watchlist'),
+                                    duration: const Duration(seconds: 2),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
                               },
                             ),
                         ],
