@@ -49,6 +49,13 @@ class WalletNotifier extends StateNotifier<Wallet> {
 
     await _repository.saveWallet(updatedWallet);
   }
+
+  /// Resets the wallet balance back to the default starting balance (₹1,00,000.00).
+  Future<void> resetWallet() async {
+    const defaultWallet = Wallet.defaultBalance();
+    state = defaultWallet;
+    await _repository.saveWallet(defaultWallet);
+  }
 }
 
 /// Provider for the user's wallet state.

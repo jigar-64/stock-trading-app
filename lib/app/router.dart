@@ -5,8 +5,8 @@ import '../app/theme/app_theme.dart';
 import '../features/market/presentation/market_screen.dart';
 import '../features/order/presentation/order_ticket_screen.dart';
 import '../features/portfolio/presentation/holdings_screen.dart';
+import '../features/profile/presentation/profile_screen.dart';
 import '../features/watchlist/presentation/watchlist_screen.dart';
-
 
 /// The main app router configuration.
 ///
@@ -14,6 +14,7 @@ import '../features/watchlist/presentation/watchlist_screen.dart';
 ///   /market      → Live Prices Mimic (Feature 2)
 ///   /watchlists  → Watchlist Management (Feature 1)
 ///   /holdings    → Portfolio Holdings (Feature 4)
+///   /profile     → Account Profile & Order History
 ///   /order/:symbol → Buy/Sell Ticket (Feature 3)
 final GoRouter appRouter = GoRouter(
   initialLocation: '/market',
@@ -45,6 +46,14 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: '/holdings',
               builder: (context, state) => const HoldingsScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/profile',
+              builder: (context, state) => const ProfileScreen(),
             ),
           ],
         ),
@@ -83,21 +92,29 @@ class _AppShell extends StatelessWidget {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.show_chart),
-            activeIcon: Icon(Icons.show_chart, color: AppColors.accentBlue),
+            activeIcon: Icon(Icons.show_chart, color: AppColors.accentIndigo),
             label: 'Market',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.list_alt),
-            activeIcon: Icon(Icons.list_alt, color: AppColors.accentBlue),
+            activeIcon: Icon(Icons.list_alt, color: AppColors.accentIndigo),
             label: 'Watchlists',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet),
             activeIcon: Icon(
               Icons.account_balance_wallet,
-              color: AppColors.accentBlue,
+              color: AppColors.accentIndigo,
             ),
             label: 'Holdings',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(
+              Icons.person,
+              color: AppColors.accentIndigo,
+            ),
+            label: 'Profile',
           ),
         ],
       ),

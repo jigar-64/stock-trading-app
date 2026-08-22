@@ -105,6 +105,12 @@ class HoldingsNotifier extends StateNotifier<List<Holding>> {
     state = updated;
     await _repository.saveHoldings(updated);
   }
+
+  /// Clears all holdings from portfolio.
+  Future<void> resetHoldings() async {
+    state = [];
+    await _repository.saveHoldings([]);
+  }
 }
 
 /// Provider for user portfolio holdings.

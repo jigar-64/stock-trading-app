@@ -25,6 +25,12 @@ class OrdersNotifier extends StateNotifier<List<Order>> {
     state = updated;
     await _repository.recordOrder(order);
   }
+
+  /// Clears executed order history.
+  Future<void> resetOrders() async {
+    state = [];
+    await _repository.saveOrders([]);
+  }
 }
 
 /// Provider for user executed order history.
