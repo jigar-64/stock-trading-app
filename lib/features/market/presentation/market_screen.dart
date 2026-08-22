@@ -23,11 +23,40 @@ class MarketScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Live Market'),
+            Row(
+              children: [
+                const Text('Live Market'),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.priceUp.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.priceUp.withValues(alpha: 0.4)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.sensors, size: 10, color: AppColors.priceUp),
+                      SizedBox(width: 3),
+                      Text(
+                        'LIVE',
+                        style: TextStyle(
+                          color: AppColors.priceUp,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             Text(
               '10 Stocks • Real-time Feed',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.textSecondary,
+                    fontSize: 11,
                   ),
             ),
           ],

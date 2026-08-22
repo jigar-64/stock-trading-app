@@ -6,6 +6,8 @@ import '../../../../core/utils/money_utils.dart';
 import '../../../market/presentation/providers/market_providers.dart';
 import '../providers/holdings_providers.dart';
 
+import '../../../wallet/presentation/providers/wallet_providers.dart';
+
 /// Aggregate Portfolio Summary Header Card (Feature 4).
 ///
 /// Modern Design Highlights:
@@ -19,6 +21,7 @@ class PortfolioSummary extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final holdings = ref.watch(holdingsProvider);
     final priceMap = ref.watch(marketPricesProvider);
+    final walletBalancePaise = ref.watch(walletBalancePaiseProvider);
 
     if (holdings.isEmpty) {
       return const SizedBox.shrink();
@@ -64,7 +67,7 @@ class PortfolioSummary extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header title & active badge
+          // Header title & Wallet Cash badge (Matching Mockup)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -78,18 +81,26 @@ class PortfolioSummary extends ConsumerWidget {
                     ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.accentIndigo.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
+                  color: AppColors.priceUp.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.priceUp.withValues(alpha: 0.3)),
                 ),
-                child: Text(
-                  '${holdings.length} Active Position${holdings.length > 1 ? 's' : ''}',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.account_balance_wallet, size: 12, color: AppColors.priceUp),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Wallet ${MoneyUtils.paiseToCurrency(walletBalancePaise)}',
+                      style: const TextStyle(
+                        color: AppColors.priceUp,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
