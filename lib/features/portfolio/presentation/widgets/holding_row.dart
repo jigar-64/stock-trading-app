@@ -40,9 +40,10 @@ class HoldingRow extends ConsumerWidget {
         ? (pnlPaise / holding.investedPaise) * 100.0
         : 0.0;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: InkWell(
+    return RepaintBoundary(
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: InkWell(
         // Tapping opens the Buy/Sell ticket pre-filled for this stock
         onTap: () => context.push('/order/${holding.symbol}'),
         borderRadius: BorderRadius.circular(12),
@@ -146,6 +147,7 @@ class HoldingRow extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

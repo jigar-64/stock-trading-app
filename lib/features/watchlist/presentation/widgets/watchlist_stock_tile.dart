@@ -47,9 +47,10 @@ class WatchlistStockTile extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: InkWell(
+    return RepaintBoundary(
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: InkWell(
         // Tapping opens the Buy/Sell ticket pre-filled with this stock
         onTap: () => context.push('/order/$symbol'),
         borderRadius: BorderRadius.circular(12),
@@ -132,6 +133,7 @@ class WatchlistStockTile extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

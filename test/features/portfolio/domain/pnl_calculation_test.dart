@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:stock_trading/core/constants/enums.dart';
 import 'package:stock_trading/features/portfolio/domain/holding_model.dart';
 
 void main() {
