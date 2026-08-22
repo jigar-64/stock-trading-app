@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app/theme/app_theme.dart';
 import '../features/market/presentation/market_screen.dart';
+import '../features/order/presentation/order_ticket_screen.dart';
 import '../features/watchlist/presentation/watchlist_screen.dart';
 
 // Placeholder screens — will be replaced in future commits
@@ -73,7 +74,7 @@ final GoRouter appRouter = GoRouter(
       path: '/order/:symbol',
       builder: (context, state) {
         final symbol = state.pathParameters['symbol'] ?? '';
-        return _PlaceholderScreen(title: 'Order: $symbol');
+        return OrderTicketScreen(symbol: symbol);
       },
     ),
   ],
