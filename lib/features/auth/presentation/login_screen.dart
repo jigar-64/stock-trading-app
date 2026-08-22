@@ -297,6 +297,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   : const Text(
                                       'LOG IN',
                                       style: TextStyle(
+                                        color: Colors.white,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 1.0,
@@ -334,25 +335,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   SizedBox(
                     width: double.infinity,
                     height: 52,
-                    child: OutlinedButton.icon(
+                    child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _handleDemoLogin,
                       icon: const Icon(
                         Icons.bolt,
-                        color: AppColors.priceUp,
+                        color: Colors.white,
                       ),
                       label: const Text(
                         '1-Tap Quick Demo Login',
                         style: TextStyle(
-                          color: AppColors.priceUp,
+                          color: Colors.white,
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: AppColors.priceUp,
-                          width: 1.5,
-                        ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.priceUp,
+                        foregroundColor: Colors.white,
+                        elevation: 4,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

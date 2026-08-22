@@ -44,13 +44,13 @@ class SortSelector extends ConsumerWidget {
               visualDensity: VisualDensity.compact,
               backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
                 if (states.contains(WidgetState.selected)) {
-                  return AppColors.accentBlue.withValues(alpha: 0.2);
+                  return AppColors.accentIndigo;
                 }
                 return AppColors.surfaceBackground;
               }),
               foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
                 if (states.contains(WidgetState.selected)) {
-                  return AppColors.accentBlue;
+                  return Colors.white;
                 }
                 return AppColors.textSecondary;
               }),

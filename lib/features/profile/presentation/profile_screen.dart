@@ -41,8 +41,12 @@ class ProfileScreen extends ConsumerWidget {
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.sellRed,
+              foregroundColor: Colors.white,
             ),
-            child: const Text('Reset Account'),
+            child: const Text(
+              'Reset Account',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

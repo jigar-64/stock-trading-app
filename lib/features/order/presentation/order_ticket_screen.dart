@@ -399,6 +399,7 @@ class _OrderTicketScreenState extends ConsumerState<OrderTicketScreen> {
                   child: Text(
                     'Place ${isBuy ? 'BUY' : 'SELL'} Order',
                     style: const TextStyle(
+                      color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),

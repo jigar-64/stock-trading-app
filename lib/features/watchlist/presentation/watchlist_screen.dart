@@ -82,8 +82,9 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
             onPressed: () => Navigator.of(context).pop(controller.text),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accentIndigo,
+              foregroundColor: Colors.white,
             ),
-            child: const Text('Create'),
+            child: const Text('Create', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -125,8 +126,9 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
             onPressed: () => Navigator.of(context).pop(controller.text),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accentIndigo,
+              foregroundColor: Colors.white,
             ),
-            child: const Text('Save'),
+            child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -159,8 +161,9 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.sellRed,
+              foregroundColor: Colors.white,
             ),
-            child: const Text('Delete'),
+            child: const Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
