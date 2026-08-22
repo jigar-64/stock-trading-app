@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/theme/app_theme.dart';
+import '../features/market/presentation/market_screen.dart';
 
 // Placeholder screens — will be replaced in future commits
 class _PlaceholderScreen extends StatelessWidget {
@@ -42,8 +43,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/market',
-              builder: (context, state) =>
-                  const _PlaceholderScreen(title: 'Market'),
+              builder: (context, state) => const MarketScreen(),
             ),
           ],
         ),
