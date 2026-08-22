@@ -4,26 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../app/theme/app_theme.dart';
 import '../features/market/presentation/market_screen.dart';
 import '../features/order/presentation/order_ticket_screen.dart';
+import '../features/portfolio/presentation/holdings_screen.dart';
 import '../features/watchlist/presentation/watchlist_screen.dart';
 
-// Placeholder screens — will be replaced in future commits
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.title});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-      ),
-    );
-  }
-}
 
 /// The main app router configuration.
 ///
@@ -61,8 +44,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/holdings',
-              builder: (context, state) =>
-                  const _PlaceholderScreen(title: 'Holdings'),
+              builder: (context, state) => const HoldingsScreen(),
             ),
           ],
         ),
