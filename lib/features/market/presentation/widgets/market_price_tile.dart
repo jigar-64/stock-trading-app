@@ -11,14 +11,11 @@ import '../providers/market_providers.dart';
 
 /// A single stock tile rendered in the Live Prices Mimic view (Feature 2).
 ///
-/// Performance Optimization:
-/// This tile is a [ConsumerWidget] that listens EXCLUSIVELY to its specific stock symbol
-/// via `ref.watch(singleStockPriceProvider(symbol))`.
-///
-/// Why this matters:
-/// When a tick arrives for "TCS", Riverpod notifies only the TCS MarketPriceTile.
-/// Unrelated rows (RELIANCE, INFY, etc.) do NOT rebuild, preventing dropped frames
-/// and visible UI jank even when tick rates exceed 50+ ticks/second.
+/// Modern Design Highlights:
+/// - Avatar Icon badge with initial symbol letter
+/// - Crisp typography and clean spacing
+/// - RepaintBoundary for isolated GPU layer repaints
+/// - Fine-grained Riverpod singleStockPriceProvider selector for zero-jank selective rebuilds
 class MarketPriceTile extends ConsumerWidget {
   const MarketPriceTile({
     super.key,
@@ -41,72 +38,125 @@ class MarketPriceTile extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return RepaintBoundary(
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: InkWell(
-        // Tapping a stock row navigates to the Buy/Sell ticket pre-filled with this symbol.
-        onTap: () => context.push('/order/$symbol'),
-        borderRadius: BorderRadius.circular(12),
-        child: FlashContainer(
-          // Flash green if price increased, red if price decreased.
-          direction: quote.direction,
-          timestamp: quote.timestamp,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            children: [
-              // Left Column: Stock Symbol & Company Full Name
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      quote.symbol,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      companyName,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
+    // Avatar initial letter
+    final initial = symbol.isNotEmpty ? symbol[0] : 'S';
 
-              // Right Column: Last Traded Price (LTP) & Live Change Indicator
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: () => context.push('/order/$symbol'),
+            borderRadius: BorderRadius.circular(16),
+            child: FlashContainer(
+              direction: quote.direction,
+              timestamp: quote.timestamp,
+              borderRadius: 16.0,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
                 children: [
-                  // Formatted currency (stored in paise, converted to ₹ format)
-                  Text(
-                    MoneyUtils.paiseToCurrency(quote.ltpPaise),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
+                  // Stock Ticker Avatar Badge
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.elevatedSurface,
+                          AppColors.surfaceBackground,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.accentIndigo.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        initial,
+                        style: const TextStyle(
+                          color: AppColors.accentIndigo,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
                         ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  // Price change badge displaying "+₹12.50 (+0.44%)" in green/red
-                  PriceChangeText(
-                    changePaise: quote.changePaise,
-                    changePercent: quote.changePercent,
+                  const SizedBox(width: 14),
+
+                  // Left Column: Stock Symbol & Company Full Name
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          quote.symbol,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                                letterSpacing: 0.3,
+                              ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          companyName,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Right Column: Last Traded Price (LTP) & Live Change Indicator
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        MoneyUtils.paiseToCurrency(quote.ltpPaise),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              letterSpacing: -0.2,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      PriceChangeText(
+                        changePaise: quote.changePaise,
+                        changePercent: quote.changePercent,
+                        fontSize: 12,
+                        showBadge: true,
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

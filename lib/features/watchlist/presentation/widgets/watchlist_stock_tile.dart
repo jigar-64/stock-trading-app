@@ -11,15 +11,10 @@ import '../../../market/presentation/providers/market_providers.dart';
 
 /// A single stock row in a watchlist tab.
 ///
-/// Critical Realtime Correctness (Symbol-Based Price Identity):
-/// This tile is passed a `Key(symbol)` and a `symbol` prop.
-/// It subscribes ONLY to `ref.watch(singleStockPriceProvider(symbol))`.
-///
-/// When stocks are reordered in the watchlist (e.g. moving INFY above RELIANCE):
-/// 1. ReorderableListView updates the position.
-/// 2. The widget receives the new symbol for its position.
-/// 3. The provider selector dynamically binds to the new symbol's live quote.
-/// Result: Stale price ticks NEVER cross over to the wrong stock row!
+/// Modern Design Highlights:
+/// - Reorder drag handle & stock avatar badge
+/// - Symbol-based price identity for zero stale tick cross-contamination
+/// - RepaintBoundary for isolated GPU layer repaints
 class WatchlistStockTile extends ConsumerWidget {
   const WatchlistStockTile({
     super.key,
@@ -47,93 +42,141 @@ class WatchlistStockTile extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final initial = symbol.isNotEmpty ? symbol[0] : 'S';
+
     return RepaintBoundary(
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: InkWell(
-        // Tapping opens the Buy/Sell ticket pre-filled with this stock
-        onTap: () => context.push('/order/$symbol'),
-        borderRadius: BorderRadius.circular(12),
-        child: FlashContainer(
-          direction: quote.direction,
-          timestamp: quote.timestamp,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-          child: Row(
-            children: [
-              // Reorder Drag Handle (for ReorderableListView)
-              ReorderableDragStartListener(
-                index: index,
-                child: const Padding(
-                  padding: EdgeInsets.only(right: 12),
-                  child: Icon(
-                    Icons.drag_handle,
-                    color: AppColors.textMuted,
-                    size: 20,
-                  ),
-                ),
-              ),
-
-              // Stock Symbol & Company Name
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      quote.symbol,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      companyName,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Live LTP & Price Change Indicator
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: () => context.push('/order/$symbol'),
+            borderRadius: BorderRadius.circular(16),
+            child: FlashContainer(
+              direction: quote.direction,
+              timestamp: quote.timestamp,
+              borderRadius: 16.0,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
                 children: [
-                  Text(
-                    MoneyUtils.paiseToCurrency(quote.ltpPaise),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
+                  // Reorder Drag Handle
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: const Padding(
+                      padding: EdgeInsets.only(right: 8, left: 4),
+                      child: Icon(
+                        Icons.drag_indicator,
+                        color: AppColors.textMuted,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+
+                  // Stock Avatar Badge
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceBackground,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.accentIndigo.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        initial,
+                        style: const TextStyle(
+                          color: AppColors.accentIndigo,
+                          fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  PriceChangeText(
-                    changePaise: quote.changePaise,
-                    changePercent: quote.changePercent,
+                  const SizedBox(width: 12),
+
+                  // Stock Symbol & Company Name
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          quote.symbol,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                                letterSpacing: 0.3,
+                              ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          companyName,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: 11,
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Live LTP & Price Change Indicator
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        MoneyUtils.paiseToCurrency(quote.ltpPaise),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
+                      ),
+                      const SizedBox(height: 3),
+                      PriceChangeText(
+                        changePaise: quote.changePaise,
+                        changePercent: quote.changePercent,
+                        fontSize: 11,
+                        showBadge: true,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 4),
+
+                  // Remove Action Button
+                  IconButton(
+                    icon: const Icon(
+                      Icons.remove_circle_outline,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
+                    tooltip: 'Remove from Watchlist',
+                    onPressed: onRemove,
                   ),
                 ],
               ),
-
-              // Remove from Watchlist Action Button
-              IconButton(
-                icon: const Icon(
-                  Icons.remove_circle_outline,
-                  color: AppColors.textMuted,
-                  size: 20,
-                ),
-                tooltip: 'Remove from Watchlist',
-                onPressed: onRemove,
-              ),
-            ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

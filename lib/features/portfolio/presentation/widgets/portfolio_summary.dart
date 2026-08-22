@@ -8,15 +8,10 @@ import '../providers/holdings_providers.dart';
 
 /// Aggregate Portfolio Summary Header Card (Feature 4).
 ///
-/// Computes and renders aggregate portfolio statistics in real time:
-/// - Total Invested: Sum of `(quantity × avgCostPaise)` for all holdings
-/// - Total Current Value: Sum of `(quantity × liveLTPPaise)` for all holdings
-/// - Total P&L (₹): `totalCurrentValue - totalInvested`
-/// - Total P&L (%): `(totalPnL / totalInvested) × 100`
-///
-/// Realtime Integrity:
-/// Reads live market prices continuously so aggregate numbers ALWAYS match
-/// the sum of individual holding rows at any given moment.
+/// Modern Design Highlights:
+/// - Sleek dark navy/slate gradient background
+/// - Bold P&L typography with soft gain/loss indicator badge
+/// - Invested vs Current Value metrics breakdown
 class PortfolioSummary extends ConsumerWidget {
   const PortfolioSummary({super.key});
 
@@ -50,25 +45,56 @@ class PortfolioSummary extends ConsumerWidget {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: AppColors.surfaceBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        gradient: AppColors.summaryGradient,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.accentIndigo.withValues(alpha: 0.25),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header title
-          Text(
-            'PORTFOLIO SUMMARY',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.textMuted,
-                  letterSpacing: 1.2,
-                  fontSize: 11,
+          // Header title & active badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'PORTFOLIO OVERVIEW',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: AppColors.accentIndigo,
+                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 11,
+                    ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.accentIndigo.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
                 ),
+                child: Text(
+                  '${holdings.length} Active Position${holdings.length > 1 ? 's' : ''}',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
           // Total P&L Main Display
           Row(
@@ -79,46 +105,57 @@ class PortfolioSummary extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Total P&L',
+                    'Total Return (P&L)',
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        MoneyUtils.formatChange(totalPnlPaise),
-                        style: TextStyle(
-                          color: pnlColor,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                    ],
+                  Text(
+                    MoneyUtils.formatChange(totalPnlPaise),
+                    style: TextStyle(
+                      color: pnlColor,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: pnlColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  MoneyUtils.formatChangePercent(totalPnlPercent),
-                  style: TextStyle(
-                    color: pnlColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: pnlColor.withValues(alpha: 0.3),
+                    width: 1,
                   ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isProfit ? Icons.trending_up : Icons.trending_down,
+                      size: 16,
+                      color: pnlColor,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      MoneyUtils.formatChangePercent(totalPnlPercent),
+                      style: TextStyle(
+                        color: pnlColor,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const Divider(height: 24),
+          const Divider(height: 28),
 
           // Invested vs Current Value Breakdown
           Row(
@@ -128,19 +165,19 @@ class PortfolioSummary extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Invested',
+                    'Total Invested',
                     style: TextStyle(
                       color: AppColors.textMuted,
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     MoneyUtils.paiseToCurrency(totalInvestedPaise),
                     style: const TextStyle(
                       color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -155,13 +192,13 @@ class PortfolioSummary extends ConsumerWidget {
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     MoneyUtils.paiseToCurrency(totalCurrentValuePaise),
                     style: const TextStyle(
                       color: AppColors.accentBlue,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
                     ),
                   ),
                 ],

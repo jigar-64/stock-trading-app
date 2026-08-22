@@ -13,11 +13,11 @@ import '../../domain/holding_model.dart';
 
 /// A single portfolio holding row in the Holdings view (Feature 4).
 ///
-/// Subscribes EXCLUSIVELY to its specific stock symbol via [singleStockPriceProvider].
-/// Live P&L and current values are DERIVED on the fly as ticks arrive:
-/// - `currentValuePaise = holding.quantity × liveLTP`
-/// - `pnlPaise = currentValuePaise - holding.investedPaise`
-/// - `pnlPercent = (pnlPaise / holding.investedPaise) × 100`
+/// Modern Design Highlights:
+/// - Avatar Ticker Icon
+/// - Glassmorphic / Gradient position details
+/// - Dynamic live P&L badge
+/// - RepaintBoundary for isolated GPU layer repaints
 class HoldingRow extends ConsumerWidget {
   const HoldingRow({
     super.key,
@@ -40,114 +40,167 @@ class HoldingRow extends ConsumerWidget {
         ? (pnlPaise / holding.investedPaise) * 100.0
         : 0.0;
 
+    final initial = holding.symbol.isNotEmpty ? holding.symbol[0] : 'S';
+
     return RepaintBoundary(
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: InkWell(
-        // Tapping opens the Buy/Sell ticket pre-filled for this stock
-        onTap: () => context.push('/order/${holding.symbol}'),
-        borderRadius: BorderRadius.circular(12),
-        child: FlashContainer(
-          direction: quote?.direction ?? PriceDirection.flat,
-          timestamp: quote?.timestamp ?? DateTime.now(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Column(
-            children: [
-              // Top Line: Symbol + Qty and Live Current Value
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            onTap: () => context.push('/order/${holding.symbol}'),
+            borderRadius: BorderRadius.circular(16),
+            child: FlashContainer(
+              direction: quote?.direction ?? PriceDirection.flat,
+              timestamp: quote?.timestamp ?? DateTime.now(),
+              borderRadius: 16.0,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Column(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  // Top Line: Ticker Avatar, Symbol + Qty, Live Current Value
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
-                          Text(
-                            holding.symbol,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.5,
-                                ),
-                          ),
-                          const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
+                            width: 40,
+                            height: 40,
                             decoration: BoxDecoration(
                               color: AppColors.surfaceBackground,
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: AppColors.border),
-                            ),
-                            child: Text(
-                              '${holding.quantity} qty',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.accentBlue,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: AppColors.accentPurple.withValues(alpha: 0.4),
+                                width: 1,
                               ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                initial,
+                                style: const TextStyle(
+                                  color: AppColors.accentPurple,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    holding.symbol,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 16,
+                                          letterSpacing: 0.3,
+                                        ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.accentIndigo.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      '${holding.quantity} QTY',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.accentIndigo,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                companyName,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 11,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            MoneyUtils.paiseToCurrency(currentValuePaise),
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'LTP: ${MoneyUtils.paiseToCurrency(currentLtpPaise)}',
+                            style: const TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 11,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        companyName,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                      ),
                     ],
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                  const Divider(height: 20),
+
+                  // Bottom Line: Avg Cost vs Live P&L Badge
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        MoneyUtils.paiseToCurrency(currentValuePaise),
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                            ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'LTP: ${MoneyUtils.paiseToCurrency(currentLtpPaise)}',
+                        'Avg Cost: ${MoneyUtils.paiseToCurrency(holding.avgCostPaise)}',
                         style: const TextStyle(
-                          color: AppColors.textMuted,
+                          color: AppColors.textSecondary,
                           fontSize: 12,
+                          fontWeight: FontWeight.w500,
                         ),
+                      ),
+                      PriceChangeText(
+                        changePaise: pnlPaise,
+                        changePercent: pnlPercent,
+                        fontSize: 12,
+                        showBadge: true,
                       ),
                     ],
                   ),
                 ],
               ),
-              const Divider(height: 20),
-
-              // Bottom Line: Avg Cost vs Live P&L
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Avg Cost: ${MoneyUtils.paiseToCurrency(holding.avgCostPaise)}',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                  PriceChangeText(
-                    changePaise: pnlPaise,
-                    changePercent: pnlPercent,
-                    fontSize: 12,
-                    showBadge: true,
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
