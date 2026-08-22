@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../../../app/theme/app_theme.dart';
 import '../../../core/utils/money_utils.dart';
+import '../../auth/presentation/providers/auth_providers.dart';
 import '../../market/presentation/providers/market_providers.dart';
 import '../../order/domain/order_model.dart';
 import '../../order/presentation/providers/order_providers.dart';
@@ -433,6 +436,37 @@ class ProfileScreen extends ConsumerWidget {
                   return _OrderHistoryTile(order: order);
                 },
               ),
+            const SizedBox(height: 24),
+
+            // Log Out Button
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  await ref.read(authProvider.notifier).logout();
+                  if (context.mounted) {
+                    context.go('/login');
+                  }
+                },
+                icon: const Icon(Icons.logout, color: Colors.white),
+                label: const Text(
+                  'LOG OUT ACCOUNT',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.sellRed.withValues(alpha: 0.8),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 32),
 
             // App Version Footer

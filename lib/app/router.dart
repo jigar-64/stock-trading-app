@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/theme/app_theme.dart';
+import '../features/auth/presentation/login_screen.dart';
+import '../features/auth/presentation/splash_screen.dart';
 import '../features/market/presentation/market_screen.dart';
 import '../features/order/presentation/order_ticket_screen.dart';
 import '../features/portfolio/presentation/holdings_screen.dart';
@@ -11,14 +13,28 @@ import '../features/watchlist/presentation/watchlist_screen.dart';
 /// The main app router configuration.
 ///
 /// Routes:
+///   /splash      → Animated Branding Splash Screen
+///   /login       → Modern Auth & Quick 1-Tap Demo Login Screen
 ///   /market      → Live Prices Mimic (Feature 2)
 ///   /watchlists  → Watchlist Management (Feature 1)
 ///   /holdings    → Portfolio Holdings (Feature 4)
 ///   /profile     → Account Profile & Order History
 ///   /order/:symbol → Buy/Sell Ticket (Feature 3)
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/market',
+  initialLocation: '/splash',
   routes: [
+    // Splash Route
+    GoRoute(
+      path: '/splash',
+      builder: (context, state) => const SplashScreen(),
+    ),
+
+    // Login Route
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginScreen(),
+    ),
+
     // Bottom navigation shell
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

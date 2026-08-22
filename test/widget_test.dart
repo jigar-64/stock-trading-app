@@ -19,7 +19,7 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
-    expect(find.text('Live Market'), findsWidgets);
+    await tester.pump();
+    expect(find.text('021 TRADING'), findsWidgets);
   });
 }
