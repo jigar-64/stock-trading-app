@@ -297,16 +297,34 @@ class _OrderTicketScreenState extends ConsumerState<OrderTicketScreen> {
               TextFormField(
                 controller: _qtyController,
                 keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
                   hintText: 'Enter quantity',
                   suffixText: 'shares',
                   errorText: _inlineError,
+                  prefixIcon: IconButton(
+                    icon: const Icon(Icons.remove, color: AppColors.textPrimary),
+                    onPressed: () {
+                      final current = int.tryParse(_qtyController.text) ?? 1;
+                      if (current > 1) {
+                        _qtyController.text = (current - 1).toString();
+                        setState(() => _inlineError = null);
+                      }
+                    },
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.add, color: AppColors.textPrimary),
+                    onPressed: () {
+                      final current = int.tryParse(_qtyController.text) ?? 0;
+                      _qtyController.text = (current + 1).toString();
+                      setState(() => _inlineError = null);
+                    },
+                  ),
                 ),
                 onChanged: (_) {
                   setState(() {
-                    // Trigger live order value recalculation & clear old error
                     _inlineError = null;
                   });
                 },
