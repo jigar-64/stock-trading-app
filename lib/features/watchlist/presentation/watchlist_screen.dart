@@ -11,11 +11,10 @@ import 'widgets/watchlist_stock_tile.dart';
 ///
 /// Features:
 /// - Supports multiple named watchlists (create, rename, delete).
-/// - TabBar navigation between watchlists.
+/// - TabBar & TabBarView synchronized navigation between watchlists.
 /// - Drag-to-reorder stocks via [ReorderableListView].
 /// - Stock picker to add stocks from the 10 available NSE stocks.
-/// - Swipe / action to remove stocks.
-/// - Persists all watchlists and stock orders across app restarts.
+/// - Persists all watchlists and stock layouts across app restarts.
 class WatchlistScreen extends ConsumerStatefulWidget {
   const WatchlistScreen({super.key});
 
@@ -29,24 +28,33 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
 
   @override
   void dispose() {
+    _tabController?.removeListener(_handleTabChange);
     _tabController?.dispose();
     super.dispose();
   }
 
   void _syncTabController(int length, int initialIndex) {
-    if (_tabController?.length != length) {
+    final clampedIndex = initialIndex.clamp(0, length > 0 ? length - 1 : 0);
+    if (_tabController == null || _tabController!.length != length) {
+      _tabController?.removeListener(_handleTabChange);
       _tabController?.dispose();
       _tabController = TabController(
         length: length,
         vsync: this,
-        initialIndex: initialIndex.clamp(0, length > 0 ? length - 1 : 0),
+        initialIndex: clampedIndex,
       );
-      _tabController?.addListener(() {
-        if (_tabController != null && !_tabController!.indexIsChanging) {
-          ref.read(activeWatchlistIndexProvider.notifier).state =
-              _tabController!.index;
-        }
-      });
+      _tabController!.addListener(_handleTabChange);
+    } else if (_tabController!.index != clampedIndex &&
+        !_tabController!.indexIsChanging) {
+      _tabController!.animateTo(clampedIndex);
+    }
+  }
+
+  void _handleTabChange() {
+    if (_tabController != null &&
+        ref.read(activeWatchlistIndexProvider) != _tabController!.index) {
+      ref.read(activeWatchlistIndexProvider.notifier).state =
+          _tabController!.index;
     }
   }
 
@@ -73,7 +81,7 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(controller.text),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accentBlue,
+              backgroundColor: AppColors.accentIndigo,
             ),
             child: const Text('Create'),
           ),
@@ -83,10 +91,12 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
 
     if (name != null && name.trim().isNotEmpty) {
       await ref.read(watchlistsProvider.notifier).createWatchlist(name);
-      // Switch tab to the newly created watchlist
       final watchlists = ref.read(watchlistsProvider);
-      ref.read(activeWatchlistIndexProvider.notifier).state =
-          watchlists.length - 1;
+      final newIndex = watchlists.length - 1;
+      ref.read(activeWatchlistIndexProvider.notifier).state = newIndex;
+      if (_tabController != null && _tabController!.length == watchlists.length) {
+        _tabController!.animateTo(newIndex);
+      }
     }
   }
 
@@ -114,7 +124,7 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(controller.text),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.accentBlue,
+              backgroundColor: AppColors.accentIndigo,
             ),
             child: const Text('Save'),
           ),
@@ -167,7 +177,7 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
     final watchlists = ref.watch(watchlistsProvider);
     final activeIndex = ref.watch(activeWatchlistIndexProvider);
 
-    // Sync tab controller whenever watchlists count changes
+    // Sync tab controller with current watchlists length & active index
     _syncTabController(watchlists.length, activeIndex);
 
     // Empty state when no watchlists exist at all
@@ -193,7 +203,6 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
       );
     }
 
-    // Ensure active index is valid
     final clampedIndex = activeIndex.clamp(0, watchlists.length - 1);
     final currentWatchlist = watchlists[clampedIndex];
 
@@ -251,12 +260,12 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
           ),
         ],
         // TabBar for switching between watchlists
-        bottom: _tabController != null && watchlists.length > 1
+        bottom: watchlists.length > 1 && _tabController != null
             ? TabBar(
                 controller: _tabController,
                 isScrollable: true,
-                indicatorColor: AppColors.accentBlue,
-                labelColor: AppColors.accentBlue,
+                indicatorColor: AppColors.accentIndigo,
+                labelColor: AppColors.accentIndigo,
                 unselectedLabelColor: AppColors.textMuted,
                 tabs: watchlists
                     .map((w) => Tab(text: '${w.name} (${w.symbols.length})'))
@@ -267,49 +276,56 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
                 child: Container(color: AppColors.divider, height: 1),
               ),
       ),
-      body: currentWatchlist.symbols.isEmpty
-          // Empty state for empty watchlist tab
-          ? EmptyStateWidget(
-              icon: Icons.search_off,
-              title: '${currentWatchlist.name} is Empty',
-              subtitle:
-                  'Add stocks from the 10 available NSE stocks to watch live price updates.',
-              actionLabel: 'Add Stock',
-              onActionPressed: () {
-                StockPickerDialog.show(
-                  context,
-                  watchlistId: currentWatchlist.id,
-                  existingSymbols: currentWatchlist.symbols,
-                  onStockSelected: (symbol) {
+      body: _tabController == null
+          ? const SizedBox.shrink()
+          : TabBarView(
+              controller: _tabController,
+              children: watchlists.map((watchlist) {
+                if (watchlist.symbols.isEmpty) {
+                  return EmptyStateWidget(
+                    icon: Icons.search_off,
+                    title: '${watchlist.name} is Empty',
+                    subtitle:
+                        'Add stocks from the 10 available NSE stocks to watch live price updates.',
+                    actionLabel: 'Add Stock',
+                    onActionPressed: () {
+                      StockPickerDialog.show(
+                        context,
+                        watchlistId: watchlist.id,
+                        existingSymbols: watchlist.symbols,
+                        onStockSelected: (symbol) {
+                          ref
+                              .read(watchlistsProvider.notifier)
+                              .addStock(watchlist.id, symbol);
+                        },
+                      );
+                    },
+                  );
+                }
+                return ReorderableListView.builder(
+                  key: PageStorageKey<String>(watchlist.id),
+                  itemCount: watchlist.symbols.length,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  onReorder: (oldIndex, newIndex) {
                     ref
                         .read(watchlistsProvider.notifier)
-                        .addStock(currentWatchlist.id, symbol);
+                        .reorderStock(watchlist.id, oldIndex, newIndex);
+                  },
+                  itemBuilder: (context, index) {
+                    final symbol = watchlist.symbols[index];
+                    return WatchlistStockTile(
+                      key: ValueKey('${watchlist.id}_$symbol'),
+                      symbol: symbol,
+                      index: index,
+                      onRemove: () {
+                        ref
+                            .read(watchlistsProvider.notifier)
+                            .removeStock(watchlist.id, symbol);
+                      },
+                    );
                   },
                 );
-              },
-            )
-          // Reorderable list of stocks in current watchlist
-          : ReorderableListView.builder(
-              itemCount: currentWatchlist.symbols.length,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              onReorder: (oldIndex, newIndex) {
-                ref
-                    .read(watchlistsProvider.notifier)
-                    .reorderStock(currentWatchlist.id, oldIndex, newIndex);
-              },
-              itemBuilder: (context, index) {
-                final symbol = currentWatchlist.symbols[index];
-                return WatchlistStockTile(
-                  key: ValueKey('${currentWatchlist.id}_$symbol'),
-                  symbol: symbol,
-                  index: index,
-                  onRemove: () {
-                    ref
-                        .read(watchlistsProvider.notifier)
-                        .removeStock(currentWatchlist.id, symbol);
-                  },
-                );
-              },
+              }).toList(),
             ),
       // Floating Action Button to add stocks to current watchlist
       floatingActionButton: FloatingActionButton.extended(
@@ -325,7 +341,7 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
             },
           );
         },
-        backgroundColor: AppColors.accentBlue,
+        backgroundColor: AppColors.accentIndigo,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(
           'Add Stock',
