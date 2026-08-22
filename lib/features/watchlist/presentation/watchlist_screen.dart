@@ -264,15 +264,46 @@ class _WatchlistScreenState extends ConsumerState<WatchlistScreen>
         ],
         // TabBar for switching between watchlists
         bottom: watchlists.length > 1 && _tabController != null
-            ? TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                indicatorColor: AppColors.accentIndigo,
-                labelColor: AppColors.accentIndigo,
-                unselectedLabelColor: AppColors.textMuted,
-                tabs: watchlists
-                    .map((w) => Tab(text: '${w.name} (${w.symbols.length})'))
-                    .toList(),
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(48),
+                child: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    dividerColor: Colors.transparent,
+                    indicator: BoxDecoration(
+                      color: AppColors.accentIndigo.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.accentIndigo.withValues(alpha: 0.6),
+                        width: 1,
+                      ),
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: AppColors.textPrimary,
+                    unselectedLabelColor: AppColors.textMuted,
+                    labelStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    tabs: watchlists
+                        .map((w) => Tab(
+                              height: 34,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text('${w.name} (${w.symbols.length})'),
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
               )
             : PreferredSize(
                 preferredSize: const Size.fromHeight(1),
