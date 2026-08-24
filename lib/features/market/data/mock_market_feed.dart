@@ -17,8 +17,8 @@ import '../domain/price_quote.dart';
 /// 4. Stress Test Support: Allows toggling tick intervals between normal (~500ms) and stress mode (~20ms / 50+ ticks/sec).
 class MockMarketFeed {
   MockMarketFeed({
-    this._tickInterval = normalTickInterval,
-  }) {
+    Duration tickInterval = normalTickInterval,
+  }) : _tickInterval = tickInterval {
     _initQuotes();
   }
 

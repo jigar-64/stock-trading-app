@@ -6,6 +6,7 @@ import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/splash_screen.dart';
 import '../features/market/presentation/market_screen.dart';
 import '../features/order/presentation/order_ticket_screen.dart';
+import '../features/order/presentation/order_confirmation_screen.dart';
 import '../features/portfolio/presentation/holdings_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/watchlist/presentation/watchlist_screen.dart';
@@ -82,6 +83,18 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final symbol = state.pathParameters['symbol'] ?? '';
         return OrderTicketScreen(symbol: symbol);
+      },
+    ),
+
+    // Order confirmation — standalone route
+    GoRoute(
+      path: '/order-confirmation',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        return OrderConfirmationScreen(
+          order: extra['order'],
+          remainingBalancePaise: extra['remainingBalancePaise'] as int,
+        );
       },
     ),
   ],

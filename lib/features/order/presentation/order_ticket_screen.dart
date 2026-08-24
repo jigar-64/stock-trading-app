@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/app_theme.dart';
 import '../../../core/constants/stock_constants.dart';
@@ -162,13 +163,12 @@ class _OrderTicketScreenState extends ConsumerState<OrderTicketScreen> {
 
     // 6. Navigate to confirmation screen
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => OrderConfirmationScreen(
-          order: executedOrder,
-          remainingBalancePaise: remainingBalance,
-        ),
-      ),
+    context.pushReplacement(
+      '/order-confirmation',
+      extra: {
+        'order': executedOrder,
+        'remainingBalancePaise': remainingBalance,
+      },
     );
   }
 
